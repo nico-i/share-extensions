@@ -1,7 +1,7 @@
 {
   "name": "sharext",
-  "displayName": "ShareXt: Share Extensions",
-  "description": "Export your vscode extensions to a shareable file. Extension files can be opened with the extension viewer, where extensions can be selected to be installed.",
+  "displayName": "ShareXt: Share Installed Extensions",
+  "description": "Export your currently installed vscode extensions to a shareable JSON file. Use the Extension Viewer to select and install extensions from a JSON file.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.85.0"
