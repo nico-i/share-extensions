@@ -1,26 +1,46 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { ExportService } from "./domain/services/ExportService";
+import { ShareXtView } from "./presentation";
+import { EXTENSION_NAME, SHARE_XT_EXTENSION } from "./util/consts";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  const exportService = new ExportService();
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "share-extensions" is now active!');
+  const extSubscriptions = [
+    vscode.commands.registerCommand(
+      `${EXTENSION_NAME}.${exportService.writeExtensionsToJson.name}`,
+      () => {
+        try {
+          exportService.writeExtensionsToJson(
+            vscode.extensions.all,
+            "extensions.sharext.json"
+          );
+        } catch (e) {
+          vscode.window.showErrorMessage(
+            "Error writing file: " +
+              (`message` in (e as Error) ? (e as Error).message : e)
+          );
+        }
+        vscode.window.showInformationMessage("Extensions list saved!");
+      }
+    ),
+    vscode.workspace.onDidOpenTextDocument((document) => {
+      if (document.uri.fsPath.endsWith(SHARE_XT_EXTENSION)) {
+        const shareXtView = new ShareXtView(document);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('share-extensions.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Share Extensions!');
-	});
+        const panel = vscode.window.createWebviewPanel(
+          shareXtView.viewType,
+          shareXtView.title,
+          shareXtView.viewColumn,
+          {}
+        );
+        panel.webview.html = shareXtView.html;
+      }
+	  
+    }),
+  ];
 
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(...extSubscriptions);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
