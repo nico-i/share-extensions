@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
-import { ExportService } from "./domain/services/ExportService";
-import { ShareXtView } from "./presentation";
+import { ExtensionService } from "./domain/services/ExtensionService";
+import { MarketplaceRepo } from "./domain/valueobjects/VsCExtension/repositories/marketplace";
 import { EXTENSION_NAME, SHARE_XT_EXTENSION } from "./util/consts";
 
 export function activate(context: vscode.ExtensionContext) {
-  const exportService = new ExportService();
+  const marketplaceRepo = new MarketplaceRepo();
+  const extensionService = new ExtensionService(marketplaceRepo);
 
   const extSubscriptions = [
     vscode.commands.registerCommand(
-      `${EXTENSION_NAME}.${exportService.writeExtensionsToJson.name}`,
-      () => {
+      `${EXTENSION_NAME}.${extensionService.writeExtensionsToJson.name}`,
+      async () => {
         try {
-          exportService.writeExtensionsToJson(
-            vscode.extensions.all,
+          await extensionService.writeExtensionsToJson(
             "extensions.sharext.json"
           );
         } catch (e) {
@@ -21,22 +21,35 @@ export function activate(context: vscode.ExtensionContext) {
               (`message` in (e as Error) ? (e as Error).message : e)
           );
         }
-        vscode.window.showInformationMessage("Extensions list saved!");
       }
     ),
     vscode.workspace.onDidOpenTextDocument((document) => {
       if (document.uri.fsPath.endsWith(SHARE_XT_EXTENSION)) {
-        const shareXtView = new ShareXtView(document);
+        const extensions = extensionService.parseExtensionsFromJson(
+          document.getText()
+        );
 
         const panel = vscode.window.createWebviewPanel(
-          shareXtView.viewType,
-          shareXtView.title,
-          shareXtView.viewColumn,
-          {}
+          "sharext",
+          "ShareXt Viewer",
+          vscode.ViewColumn.Beside,
+          {
+            enableScripts: true,
+          }
         );
-        panel.webview.html = shareXtView.html;
+
+        panel.webview.html = `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>My Webview</title>
+        </head>
+        <body>
+            ${extensions.map((ext) => ext.html).join("")}
+        </body>
+        </html>`;
       }
-	  
     }),
   ];
 
