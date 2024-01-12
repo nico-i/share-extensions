@@ -15,6 +15,11 @@
   white-space: nowrap;
 }
 
+.extension__container:hover {
+  background-color: rgba(255, 255, 255, 0.13);
+  cursor: pointer;
+}
+
 .extension__info {
   width: 100%;
   display: flex;
@@ -42,13 +47,7 @@ strong {
   align-items: center;
 }
 
-.extension_btns {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-}
-
-.btn {
+.extension__install {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +60,7 @@ strong {
   min-height: 1rem;
 }
 
-.btn:hover {
+.extension__install:hover {
   background-color: var(--primary-color-hover);
   color: white;
 }

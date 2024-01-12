@@ -90,7 +90,7 @@ export class Extension {
 
   get html(): string {
     return `
-    <div class="extension__container">
+    <div class="extension__container" role="button" id="${this._id}">
         <img src="${this._iconSrc ?? this._placeholderIconSrc}"
             alt="${this._name} icon" style="width: 2.625rem;">
         <div class="extension__info">
@@ -98,22 +98,15 @@ export class Extension {
             <span>${this._description}</span>
             <div class="extension__author">
                 <small><b>${this._author}</b></small>
-                <div class="extension_btns">
                  ${
                    !this._installed
                      ? `
-                 <a class="btn" href="command:workbench.extensions.installExtension?${this._id}" role="button">
+                 <a class="extension__install" data-ext-id="${this._id}" role="button" >
                  Install
                   </a>
                  `
                      : ""
                  }
-                    <a href=" ${
-                      this._marketplaceUrl
-                    }" target="_blank" rel="noopener noreferrer" class="btn">
-                        Marketplace
-                    </a>
-                </div>
             </div>
         </div>
     </div>

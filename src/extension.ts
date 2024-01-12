@@ -79,6 +79,11 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(...subs);
 }
 
+enum ExtensionViewerCommands {
+  open = "openExtension",
+  install = "installExtension",
+}
+
 function openExtensionViewer(extensions: Extension[], css: string) {
   const panel = vscode.window.createWebviewPanel(
     "ext-viewer",
@@ -88,6 +93,24 @@ function openExtensionViewer(extensions: Extension[], css: string) {
       enableScripts: true,
     }
   );
+  panel.webview.onDidReceiveMessage(
+    (message) => {
+      switch (message.command) {
+        case ExtensionViewerCommands.install:
+          vscode.commands.executeCommand(
+            "workbench.extensions.installExtension",
+            message.id
+          );
+          return;
+        case ExtensionViewerCommands.open:
+          vscode.commands.executeCommand("extension.open", message.id);
+          return;
+      }
+    },
+    undefined,
+    []
+  );
+
   panel.webview.html = `
   <!DOCTYPE html>
   <html lang="en">
@@ -102,6 +125,26 @@ function openExtensionViewer(extensions: Extension[], css: string) {
     <body>
       ${extensions.map((ext) => ext.html).join("")}
     </body>
+    <script>
+      const vscode = acquireVsCodeApi();
+      document.querySelectorAll(".extension__container").forEach((el) => {
+        el.addEventListener("click", () => {
+          vscode.postMessage({
+            command: "${ExtensionViewerCommands.open}",
+            id: el.id,
+          });
+        });
+      });
+      document.querySelectorAll(".extension__install").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          vscode.postMessage({
+            command: "${ExtensionViewerCommands.install}",
+            id: el.attributes["data-ext-id"].value,
+          });
+        });
+      });
+    </script>
   </html>`;
 }
 
