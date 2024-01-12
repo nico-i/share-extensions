@@ -18,7 +18,11 @@
     "commands": [
       {
         "command": "ext-share.writeExtensionsToJson",
-        "title": "ShareXt: Extensions to JSON"
+        "title": "ExtShare: Export Extensions to JSON"
+      },
+      {
+        "command": "ext-share.openExtensionViewer",
+        "title": "ExtShare: Open Extension Viewer"
       }
     ]
   },

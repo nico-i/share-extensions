@@ -1,4 +1,7 @@
 export class Extension {
+  private readonly _placeholderIconSrc =
+    "https://main.vscode-cdn.net/stable/0ee08df0cf4527e40edc9aa28f4b5bd38bbff2b2/out/vs/workbench/services/extensionManagement/common/media/defaultIcon.png";
+
   private readonly _id: string;
   private readonly _name: string;
   private readonly _author: string;
@@ -88,7 +91,7 @@ export class Extension {
   get html(): string {
     return `
     <div class="extension__container">
-        <img src="${this._iconSrc}"
+        <img src="${this._iconSrc ?? this._placeholderIconSrc}"
             alt="${this._name} icon" style="width: 2.625rem;">
         <div class="extension__info">
             <strong>${this._name}</strong>
@@ -96,10 +99,18 @@ export class Extension {
             <div class="extension__author">
                 <small><b>${this._author}</b></small>
                 <div class="extension_btns">
-                    <a href=" ${this._marketplaceUrl}" target="_blank" rel="noopener noreferrer" class="btn">
-                        Install
-                    </a>
-                    <a href=" ${this._marketplaceUrl}" target="_blank" rel="noopener noreferrer" class="btn">
+                 ${
+                   !this._installed
+                     ? `
+                 <a class="btn" href="command:workbench.extensions.installExtension?${this._id}" role="button">
+                 Install
+                  </a>
+                 `
+                     : ""
+                 }
+                    <a href=" ${
+                      this._marketplaceUrl
+                    }" target="_blank" rel="noopener noreferrer" class="btn">
                         Marketplace
                     </a>
                 </div>

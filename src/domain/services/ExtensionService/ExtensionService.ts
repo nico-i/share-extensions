@@ -11,51 +11,96 @@ export class ExtensionService {
     this._marketplaceRepo = marketplaceRepo;
   }
 
-  public async writeExtensionsToJson(path: string) {
-    if (path === "" || !path.endsWith(EXTENSION_LIST_FILE_EXT)) {
+  /**
+   * Writes a JSON file containing all installed extensions with their info from the marketplace to the given path.
+   *
+   * @param pathToOutputFile Path to write the JSON file to. Must end with EXTENSION_LIST_FILE_EXT
+   * @returns The path to the file that was written
+   */
+  public async writeExtensionsToJson(
+    pathToOutputFile: string
+  ): Promise<string> {
+    if (
+      pathToOutputFile === "" ||
+      !pathToOutputFile.endsWith(EXTENSION_LIST_FILE_EXT)
+    ) {
       throw new Error(`File path must end with '${EXTENSION_LIST_FILE_EXT}'`);
     }
+    const localRetrievalProgress = 10;
+    const fetchingProgress = 80;
+    return await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Creating extension list",
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({
+          increment: 0,
+          message: "Retrieving local extensions...",
+        });
 
-    const allLocalExtensionsWithoutBuiltins: vscode.Extension<any>[] =
-      vscode.extensions.all.filter(
-        (ext) =>
-          !ext.packageJSON.isBuiltin &&
-          !ext.id.startsWith("undefined_publisher.")
-      );
+        const allLocalExtsWithoutBuiltins: vscode.Extension<any>[] =
+          vscode.extensions.all.filter(
+            (ext) =>
+              !ext.packageJSON.isBuiltin &&
+              !ext.id.startsWith("undefined_publisher.")
+          );
 
-    const allLocalVsCExtensions: Extension[] =
-      allLocalExtensionsWithoutBuiltins.map(
-        (ext) =>
-          new Extension({
-            id: ext.id,
-            name: ext.packageJSON.name,
-            author: ext.packageJSON.publisher,
-            description: ext.packageJSON.description,
-          })
-      );
+        const allLocalExts: Extension[] = allLocalExtsWithoutBuiltins.map(
+          (ext) =>
+            new Extension({
+              id: ext.id,
+              name: ext.packageJSON.name,
+              author: ext.packageJSON.publisher,
+              description: ext.packageJSON.description,
+            })
+        );
 
-    const allVscExtensions: Extension[] = (
-      await Promise.allSettled(
-        allLocalVsCExtensions.map((ext) =>
-          this._marketplaceRepo.getExtensionById(ext.id)
-        )
-      )
-    ).map((ext, index): Extension => {
-      if (ext.status === "rejected") {
-        return allLocalVsCExtensions[index];
-      } else if (ext.status === "fulfilled") {
-        return ext.value;
-      }
-      return allLocalVsCExtensions[index];
-    });
+        progress.report({
+          increment: localRetrievalProgress,
+          message: "Fetching extension info from marketplace...",
+        });
 
-    fs.writeFile(
-      path,
-      "[" + allVscExtensions.map((ext) => ext.toJSON()).join(",\n") + "]",
-      (err) => {
-        if (err) {
-          throw err;
-        }
+        const fetchIncrement = fetchingProgress / allLocalExts.length;
+        const allExtPromises: PromiseSettledResult<Extension>[] =
+          await Promise.allSettled(
+            allLocalExts.map((ext) => {
+              const extPromise = this._marketplaceRepo
+                .getExtensionById(ext.id)
+                .then((ext) => {
+                  progress.report({
+                    increment: fetchIncrement,
+                    message: `Fetching info for '${ext.name}'...`,
+                  });
+                  return ext;
+                });
+              return extPromise;
+            })
+          );
+
+        const allExts: Extension[] = allExtPromises.map(
+          (ext, index): Extension => {
+            if (ext.status === "rejected") {
+              return allLocalExts[index];
+            } else if (ext.status === "fulfilled") {
+              return ext.value;
+            }
+            return allLocalExts[index];
+          }
+        );
+
+        progress.report({
+          increment: 100 - localRetrievalProgress - fetchingProgress,
+          message: "Writing JSON file...",
+        });
+
+        fs.writeFileSync(
+          pathToOutputFile,
+          "[" + allExts.map((ext) => ext.toJSON()).join(",\n") + "]"
+        );
+        progress.report({ increment: 100 });
+        return pathToOutputFile;
       }
     );
   }
@@ -66,16 +111,21 @@ export class ExtensionService {
     );
 
     return extensions
-      .map(
-        (ext: any) =>
-          new Extension({
-            name: ext.name,
-            author: ext.author,
-            description: ext.description,
-            id: ext.id,
-            iconSrc: ext.iconSrc,
-          })
-      )
+      .map((ext: any) => {
+        const isInstalled = vscode.extensions.all.some(
+          (installedExt) =>
+            !installedExt.packageJSON.isBuiltin && installedExt.id === ext.id
+        );
+
+        return new Extension({
+          name: ext.name,
+          author: ext.author,
+          description: ext.description,
+          id: ext.id,
+          iconSrc: ext.iconSrc,
+          installed: isInstalled,
+        });
+      })
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 }
