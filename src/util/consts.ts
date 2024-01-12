@@ -1,2 +1,2 @@
 export const EXTENSION_NAME = "sharext";
-export const SHARE_XT_EXTENSION = "sharext.json";
+export const EXTENSION_LIST_FILE_EXT = "sharext.json";

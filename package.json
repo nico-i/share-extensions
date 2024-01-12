@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onDidOpenTextDocument"
+    "onDidOpenTextDocument",
+    "onLanguage:json"
   ],
   "main": "./dist/extension.js",
   "contributes": {

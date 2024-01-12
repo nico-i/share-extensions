@@ -59,7 +59,7 @@ export class MarketplaceRepo implements VsCExtensionRepository {
 
     const ext = new VsCExtension({
       id: extensionId,
-      name: extFromData.extensionName,
+      name: extFromData.displayName,
       author: extFromData.publisher.displayName,
       description: extFromData.shortDescription,
       iconSrc: smallIconUrl,

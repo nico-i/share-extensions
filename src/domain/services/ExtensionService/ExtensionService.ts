@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
-import { SHARE_XT_EXTENSION } from "../../../util/consts";
+import { EXTENSION_LIST_FILE_EXT } from "../../../util/consts";
 import { VsCExtension } from "../../valueobjects";
 import { MarketplaceRepo } from "../../valueobjects/VsCExtension/repositories/marketplace";
 
@@ -12,8 +12,8 @@ export class ExtensionService {
   }
 
   public async writeExtensionsToJson(path: string) {
-    if (path === "" || !path.endsWith(SHARE_XT_EXTENSION)) {
-      throw new Error(`File path must end with '${SHARE_XT_EXTENSION}'`);
+    if (path === "" || !path.endsWith(EXTENSION_LIST_FILE_EXT)) {
+      throw new Error(`File path must end with '${EXTENSION_LIST_FILE_EXT}'`);
     }
 
     const allLocalExtensionsWithoutBuiltins: vscode.Extension<any>[] =
@@ -22,7 +22,7 @@ export class ExtensionService {
           !ext.packageJSON.isBuiltin &&
           !ext.id.startsWith("undefined_publisher.")
       );
-  
+
     const allLocalVsCExtensions: VsCExtension[] =
       allLocalExtensionsWithoutBuiltins.map(
         (ext) =>

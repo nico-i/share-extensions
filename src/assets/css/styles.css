@@ -1,0 +1,67 @@
+* {
+  --primary-color: #10639c;
+  --primary-color-hover: #1177bb;
+}
+
+.extension__container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  padding: 0.875rem 1rem;
+  gap: 1rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.extension__info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.extension__info strong {
+  font-size: 1.125rem;
+}
+
+.extension__info span,
+p,
+strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.extension__author {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.extension_btns {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  padding: 4px 6px;
+  min-height: 1rem;
+}
+
+.btn:hover {
+  background-color: var(--primary-color-hover);
+  color: white;
+}

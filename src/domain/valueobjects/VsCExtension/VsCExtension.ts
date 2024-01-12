@@ -35,6 +35,7 @@ export class VsCExtension {
         author: this._author,
         description: this._description,
         iconSrc: this._iconSrc,
+        marketplaceUrl: this._marketplaceUrl,
       },
       null,
       2
@@ -78,18 +79,24 @@ export class VsCExtension {
 
   get html(): string {
     return `
-    <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 14px 16px;">
-      <div style="display: flex; flex-direction: justify-items: start; align-items: center; gap: 16px;">
-          <img src="${this._iconSrc}" alt="${this._name} icon" style="width: 42px;" />
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <strong style="font-size: 1.15rem;">${this._name}</strong>
-            <span>${this.description}</span>
-            <small><b>${this._author}</b></small>
-          </div>
-      </div>
-        <a href="${this._marketplaceUrl}" target="_blank" rel="noopener noreferrer" style="align-self: flex-end;">
-            View on Marketplace
-        </a>
+    <div class="extension__container">
+        <img src="${this._iconSrc}"
+            alt="${this._name} icon" style="width: 2.625rem;">
+        <div class="extension__info">
+            <strong>${this._name}</strong>
+            <span>${this._description}</span>
+            <div class="extension__author">
+                <small><b>${this._author}</b></small>
+                <div class="extension_btns">
+                    <a href=" ${this._marketplaceUrl}" target="_blank" rel="noopener noreferrer" class="btn">
+                        Install
+                    </a>
+                    <a href=" ${this._marketplaceUrl}" target="_blank" rel="noopener noreferrer" class="btn">
+                        Marketplace
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
     `;
   }
