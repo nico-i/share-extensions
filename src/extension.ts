@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import * as vscode from "vscode";
 import { ExtensionService } from "./domain/services/ExtensionService";
-import { VsCExtension } from "./domain/valueobjects";
-import { MarketplaceRepo } from "./domain/valueobjects/VsCExtension/repositories/marketplace";
+import { Extension } from "./domain/valueobjects";
+import { MarketplaceRepo } from "./domain/valueobjects/Extension/repositories/marketplace";
 import { EXTENSION_LIST_FILE_EXT, EXTENSION_NAME } from "./util/consts";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(...extSubscriptions);
 }
 
-function openExtensionViewer(extensions: VsCExtension[], css: string) {
+function openExtensionViewer(extensions: Extension[], css: string) {
   const panel = vscode.window.createWebviewPanel(
     "sharext",
     "ShareXt Viewer",

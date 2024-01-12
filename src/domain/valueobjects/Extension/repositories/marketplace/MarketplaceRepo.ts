@@ -1,12 +1,12 @@
 const axios = require("axios");
-import { VsCExtension, VsCExtensionRepository } from "../..";
+import { Extension, ExtensionRepository } from "../..";
 
 export interface MarketplaceRepoConfig {
   apiUrl: string;
   apiVersion: string;
 }
 
-export class MarketplaceRepo implements VsCExtensionRepository {
+export class MarketplaceRepo implements ExtensionRepository {
   private readonly _config: MarketplaceRepoConfig;
 
   constructor(
@@ -18,7 +18,7 @@ export class MarketplaceRepo implements VsCExtensionRepository {
     this._config = config;
   }
 
-  async getExtensionById(extensionId: string): Promise<VsCExtension> {
+  async getExtensionById(extensionId: string): Promise<Extension> {
     const response = await axios.post(
       this._config.apiUrl,
       {
@@ -57,7 +57,7 @@ export class MarketplaceRepo implements VsCExtensionRepository {
       (f: any) => f.assetType === "Microsoft.VisualStudio.Services.Icons.Small"
     )?.source;
 
-    const ext = new VsCExtension({
+    const ext = new Extension({
       id: extensionId,
       name: extFromData.displayName,
       author: extFromData.publisher.displayName,

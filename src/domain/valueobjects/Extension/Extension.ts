@@ -1,10 +1,11 @@
-export class VsCExtension {
+export class Extension {
+  private readonly _id: string;
   private readonly _name: string;
   private readonly _author: string;
   private readonly _description: string;
-  private readonly _id: string;
-  private readonly _iconSrc?: string;
   private readonly _marketplaceUrl: string;
+  private readonly _iconSrc?: string;
+  private readonly _installed?: boolean;
 
   constructor({
     name,
@@ -12,12 +13,14 @@ export class VsCExtension {
     description,
     id,
     iconSrc,
+    installed,
   }: {
     name: string;
     author: string;
     description: string;
     id: string;
     iconSrc?: string;
+    installed?: boolean;
   }) {
     this._name = name;
     this._author = author;
@@ -25,6 +28,7 @@ export class VsCExtension {
     this._id = id;
     this._iconSrc = iconSrc;
     this._marketplaceUrl = `https://marketplace.visualstudio.com/items?itemName=${this._id}`;
+    this._installed = installed;
   }
 
   public toJSON(): string {
@@ -42,9 +46,9 @@ export class VsCExtension {
     );
   }
 
-  static fromJSON(jsonStr: string): VsCExtension {
+  static fromJSON(jsonStr: string): Extension {
     const json = JSON.parse(jsonStr);
-    return new VsCExtension({
+    return new Extension({
       id: json.id,
       name: json.name,
       author: json.author,
@@ -77,6 +81,10 @@ export class VsCExtension {
     return this._marketplaceUrl;
   }
 
+  get installed(): boolean | undefined {
+    return this._installed;
+  }
+
   get html(): string {
     return `
     <div class="extension__container">
@@ -102,6 +110,6 @@ export class VsCExtension {
   }
 }
 
-export interface VsCExtensionRepository {
-  getExtensionById(extensionId: string): Promise<VsCExtension>;
+export interface ExtensionRepository {
+  getExtensionById(extensionId: string): Promise<Extension>;
 }

@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import { EXTENSION_LIST_FILE_EXT } from "../../../util/consts";
-import { VsCExtension } from "../../valueobjects";
-import { MarketplaceRepo } from "../../valueobjects/VsCExtension/repositories/marketplace";
+import { Extension } from "../../valueobjects";
+import { MarketplaceRepo } from "../../valueobjects/Extension/repositories/marketplace";
 
 export class ExtensionService {
   private readonly _marketplaceRepo: MarketplaceRepo;
@@ -23,10 +23,10 @@ export class ExtensionService {
           !ext.id.startsWith("undefined_publisher.")
       );
 
-    const allLocalVsCExtensions: VsCExtension[] =
+    const allLocalVsCExtensions: Extension[] =
       allLocalExtensionsWithoutBuiltins.map(
         (ext) =>
-          new VsCExtension({
+          new Extension({
             id: ext.id,
             name: ext.packageJSON.name,
             author: ext.packageJSON.publisher,
@@ -34,13 +34,13 @@ export class ExtensionService {
           })
       );
 
-    const allVscExtensions: VsCExtension[] = (
+    const allVscExtensions: Extension[] = (
       await Promise.allSettled(
         allLocalVsCExtensions.map((ext) =>
           this._marketplaceRepo.getExtensionById(ext.id)
         )
       )
-    ).map((ext, index): VsCExtension => {
+    ).map((ext, index): Extension => {
       if (ext.status === "rejected") {
         return allLocalVsCExtensions[index];
       } else if (ext.status === "fulfilled") {
@@ -60,15 +60,15 @@ export class ExtensionService {
     );
   }
 
-  public parseExtensionsFromJson(jsonStr: string): VsCExtension[] {
-    const extensions: VsCExtension[] = JSON.parse(jsonStr).map((ext: any) =>
-      VsCExtension.fromJSON(JSON.stringify(ext))
+  public parseExtensionsFromJson(jsonStr: string): Extension[] {
+    const extensions: Extension[] = JSON.parse(jsonStr).map((ext: any) =>
+      Extension.fromJSON(JSON.stringify(ext))
     );
 
     return extensions
       .map(
         (ext: any) =>
-          new VsCExtension({
+          new Extension({
             name: ext.name,
             author: ext.author,
             description: ext.description,

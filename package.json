@@ -1,7 +1,7 @@
 {
-  "name": "sharext",
-  "displayName": "ShareXt: Share Installed Extensions",
-  "description": "Export your currently installed vscode extensions to a shareable JSON file. Use the Extension Viewer to select and install extensions from a JSON file.",
+  "name": "ext-share",
+  "displayName": "ExtShare: Share a list of installed VSC-Extensions",
+  "description": "Export your currently installed vscode extensions to a shareable JSON file. Use the Extension Viewer to select and install selected extensions.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.85.0"
@@ -17,7 +17,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "sharext.writeExtensionsToJson",
+        "command": "ext-share.writeExtensionsToJson",
         "title": "ShareXt: Extensions to JSON"
       }
     ]
