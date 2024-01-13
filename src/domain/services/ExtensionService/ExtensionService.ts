@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
-import { EXTENSION_LIST_FILE_EXT } from "../../../util/consts";
-import { Extension } from "../../valueobjects";
-import { MarketplaceRepo } from "../../valueobjects/Extension/repositories/marketplace";
+import { EXTENSION_LIST_FILE_EXT } from "../../../utils/consts";
+import { Extension } from "../../valueobjects/Extension";
+import { MarketplaceRepo } from "../../valueobjects/Extension/repositories/MarketPlaceRepo";
 
 export class ExtensionService {
   private readonly _marketplaceRepo: MarketplaceRepo;
@@ -108,40 +108,25 @@ export class ExtensionService {
   public async parseExtensionsFromJson(
     jsonStr: vscode.Uri
   ): Promise<Extension[]> {
-    return await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Parsing extensions from JSON",
-        cancellable: false,
-      },
-      async (progress) => {
-        progress.report({ increment: 0 });
-        const file = fs.readFileSync(jsonStr.fsPath, "utf8");
-        const extensions: Extension[] = JSON.parse(file).map((ext: any) =>
-          Extension.fromJSON(JSON.stringify(ext))
-        );
-
-        extensions.forEach((ext: Extension) => {
-          const isInstalled = vscode.extensions.all.some(
-            (installedExt) =>
-              !installedExt.packageJSON.isBuiltin && installedExt.id === ext.id
-          );
-          ext.installed = isInstalled;
-          progress.report({
-            increment: 80 / extensions.length,
-            message: `Parsing '${ext.name}'...`,
-          });
-          return ext;
-        });
-
-        progress.report({ increment: 90, message: "Sorting extensions..." });
-        const sortedExtensions = extensions.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-
-        progress.report({ increment: 100 });
-        return sortedExtensions;
-      }
+    const file = fs.readFileSync(jsonStr.fsPath, "utf8");
+    const extensions: Extension[] = JSON.parse(file).map((ext: any) =>
+      Extension.fromJSON(JSON.stringify(ext))
     );
+
+    extensions.forEach((ext: Extension) => {
+      const isInstalled = vscode.extensions.all.some(
+        (installedExt) =>
+          !installedExt.packageJSON.isBuiltin && installedExt.id === ext.id
+      );
+      ext.installed = isInstalled;
+
+      return ext;
+    });
+
+    const sortedExtensions = extensions.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    return sortedExtensions;
   }
 }

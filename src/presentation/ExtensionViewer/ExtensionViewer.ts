@@ -1,6 +1,7 @@
 import path from "path";
 import * as vscode from "vscode";
-import { ExtensionService } from "../../domain/services/ExtensionService";
+import { ExtensionService } from "../../domain/services";
+import { EXTENSION_ID } from "../../utils/consts";
 
 enum ExtensionViewerCommands {
   open = "openExtension",
@@ -17,6 +18,7 @@ export class ExtensionViewer {
   private _panel: vscode.WebviewPanel | undefined;
   private _sourceFile: vscode.Uri | undefined;
   private _isOpen = false;
+  private _iconPath: vscode.Uri | undefined;
 
   static init(extensionService: ExtensionService, css: string) {
     ExtensionViewer.instance = new ExtensionViewer(extensionService, css);
@@ -32,6 +34,12 @@ export class ExtensionViewer {
   private constructor(extensionService: ExtensionService, css: string) {
     this._css = css;
     this._extensionService = extensionService;
+
+    const extensionRoot =
+      vscode.extensions.getExtension(EXTENSION_ID)?.extensionPath;
+    this._iconPath = extensionRoot
+      ? vscode.Uri.file(path.join(extensionRoot, "images", "icon.svg"))
+      : undefined;
   }
 
   private open() {
@@ -47,11 +55,7 @@ export class ExtensionViewer {
       }
     );
 
-    const iconPath = vscode.Uri.file(
-      path.join(__dirname, "..", "images", "icon.png")
-    );
-
-    this._panel.iconPath = iconPath;
+    this._panel.iconPath = this._iconPath;
 
     this._panel.webview.onDidReceiveMessage(
       (message) => {
@@ -100,6 +104,24 @@ export class ExtensionViewer {
 
     if (!this._panel) {
       throw new Error("Panel not set");
+    } else {
+      // Show loading spinner
+      this._panel.webview.html = `<!DOCTYPE html>
+      <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>ShareXt Viewer</title>
+                <style>
+                    ${this._css}
+                </style>
+            </head>
+            <body>
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+              <span class="loader"></span>
+            </div>
+            </body>
+        </html>`;
     }
 
     const extensions = await this._extensionService.parseExtensionsFromJson(

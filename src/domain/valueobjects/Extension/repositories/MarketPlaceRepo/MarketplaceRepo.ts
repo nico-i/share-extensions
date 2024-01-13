@@ -1,5 +1,6 @@
+import { ExtensionRepository, Extension } from "../..";
+
 const axios = require("axios");
-import { Extension, ExtensionRepository } from "../..";
 
 export interface MarketplaceRepoConfig {
   apiUrl: string;

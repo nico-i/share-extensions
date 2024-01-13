@@ -1,32 +1,25 @@
-import fs from "fs";
 import path from "path";
 import * as vscode from "vscode";
-import { ExtensionService } from "./domain/services/ExtensionService";
-import { MarketplaceRepo } from "./domain/valueobjects/Extension/repositories/marketplace";
-import { ExtensionViewer } from "./presentation/ExtensionViewer/ExtensionViewer";
-import { EXTENSION_LIST_FILE_EXT, EXTENSION_NAME } from "./util/consts";
+import { ExtensionService } from "./domain/services";
+import { MarketplaceRepo } from "./domain/valueobjects/Extension/repositories/MarketPlaceRepo";
+import { ExtensionViewer } from "./presentation/ExtensionViewer";
+import { css, EXTENSION_LIST_FILE_EXT, EXTENSION_NAME } from "./utils/consts";
 
 export function activate(context: vscode.ExtensionContext) {
   // Initialize Repos and Services
   const marketplaceRepo = new MarketplaceRepo();
   const extensionService = new ExtensionService(marketplaceRepo);
 
-  // Load CSS
-  const cssPath = vscode.Uri.file(
-    path.join(context.extensionPath, "src", "assets", "css", "styles.css")
-  );
-  const css = fs.readFileSync(cssPath.fsPath, "utf8");
-
   // Initialize ExtensionViewer
   ExtensionViewer.init(extensionService, css);
 
-  const activeEditor = vscode.window.activeTextEditor;
+  let activeEditor = vscode.window.activeTextEditor;
   // Open ExtensionViewer if first file opened is an extensions JSON file
   if (activeEditor?.document.fileName.endsWith(EXTENSION_LIST_FILE_EXT)) {
     ExtensionViewer.getInstance().rerender(activeEditor.document.uri);
   }
 
-  const rerenderOnExtChange = vscode.extensions.onDidChange(() => {
+  const rerenderOnExtsUpdate = vscode.extensions.onDidChange(() => {
     const viewer = ExtensionViewer.getInstance();
     if (viewer.isOpen) {
       vscode.window.showInformationMessage(
@@ -35,22 +28,26 @@ export function activate(context: vscode.ExtensionContext) {
       viewer.rerender();
     }
   });
-  context.subscriptions.push(rerenderOnExtChange);
+  context.subscriptions.push(rerenderOnExtsUpdate);
 
   const rerenderOnJsonChange = vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      if (activeEditor) {
-        const document = event.document;
-        if (
-          document === activeEditor.document &&
-          document.uri.fsPath.endsWith(EXTENSION_LIST_FILE_EXT)
-        ) {
-          ExtensionViewer.getInstance().rerender();
-        }
+      const document = event.document;
+      if (document.uri.fsPath.endsWith(EXTENSION_LIST_FILE_EXT)) {
+        ExtensionViewer.getInstance().rerender();
       }
     }
   );
   context.subscriptions.push(rerenderOnJsonChange);
+
+  const rerenderOnFocusChange = vscode.window.onDidChangeActiveTextEditor(
+    (editor) => {
+      if (editor?.document.fileName.endsWith(EXTENSION_LIST_FILE_EXT)) {
+        ExtensionViewer.getInstance().rerender(editor.document.uri);
+      }
+    }
+  );
+  context.subscriptions.push(rerenderOnFocusChange);
 
   const rerenderOnJsonOpen = vscode.workspace.onDidOpenTextDocument(
     (document) => {
@@ -109,11 +106,16 @@ export function activate(context: vscode.ExtensionContext) {
         await extensionService.writeExtensionsToJson(fullPath);
         const fileUri = vscode.Uri.file(fullPath);
         vscode.window.showInformationMessage(
-          `Extensions written to 'extensions.${EXTENSION_LIST_FILE_EXT}'`
+          `Extensions list written to '${fileUri.fsPath}'`
         );
-        vscode.window.showTextDocument(fileUri, {
-          viewColumn: vscode.ViewColumn.Beside,
-        });
+        const document = await vscode.workspace.openTextDocument(fileUri);
+        await vscode.window.showTextDocument(
+          document,
+          vscode.ViewColumn.One,
+          false
+        );
+
+        vscode.commands.executeCommand(`${EXTENSION_NAME}.openExtensionViewer`);
       } catch (e) {
         vscode.window.showErrorMessage(
           "Error writing file: " +
