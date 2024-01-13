@@ -8,7 +8,7 @@ export class Extension {
   private readonly _description: string;
   private readonly _marketplaceUrl: string;
   private readonly _iconSrc?: string;
-  private readonly _installed?: boolean;
+  private _installed?: boolean;
 
   constructor({
     name,
@@ -60,6 +60,10 @@ export class Extension {
     });
   }
 
+  set installed(installed: boolean) {
+    this._installed = installed;
+  }
+
   get name(): string {
     return this._name;
   }
@@ -98,15 +102,13 @@ export class Extension {
             <span>${this._description}</span>
             <div class="extension__author">
                 <small><b>${this._author}</b></small>
-                 ${
-                   !this._installed
-                     ? `
-                 <a class="extension__install" data-ext-id="${this._id}" role="button" >
+                 <a class="extension__install" data-ext-id="${
+                   this._id
+                 }" role="button" style="${
+      this._installed ? "visibility: hidden;" : ""
+    }">
                  Install
-                  </a>
-                 `
-                     : ""
-                 }
+                </a>
             </div>
         </div>
     </div>

@@ -105,27 +105,43 @@ export class ExtensionService {
     );
   }
 
-  public parseExtensionsFromJson(jsonStr: string): Extension[] {
-    const extensions: Extension[] = JSON.parse(jsonStr).map((ext: any) =>
-      Extension.fromJSON(JSON.stringify(ext))
-    );
-
-    return extensions
-      .map((ext: any) => {
-        const isInstalled = vscode.extensions.all.some(
-          (installedExt) =>
-            !installedExt.packageJSON.isBuiltin && installedExt.id === ext.id
+  public async parseExtensionsFromJson(
+    jsonStr: vscode.Uri
+  ): Promise<Extension[]> {
+    return await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Parsing extensions from JSON",
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({ increment: 0 });
+        const file = fs.readFileSync(jsonStr.fsPath, "utf8");
+        const extensions: Extension[] = JSON.parse(file).map((ext: any) =>
+          Extension.fromJSON(JSON.stringify(ext))
         );
 
-        return new Extension({
-          name: ext.name,
-          author: ext.author,
-          description: ext.description,
-          id: ext.id,
-          iconSrc: ext.iconSrc,
-          installed: isInstalled,
+        extensions.forEach((ext: Extension) => {
+          const isInstalled = vscode.extensions.all.some(
+            (installedExt) =>
+              !installedExt.packageJSON.isBuiltin && installedExt.id === ext.id
+          );
+          ext.installed = isInstalled;
+          progress.report({
+            increment: 80 / extensions.length,
+            message: `Parsing '${ext.name}'...`,
+          });
+          return ext;
         });
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
+
+        progress.report({ increment: 90, message: "Sorting extensions..." });
+        const sortedExtensions = extensions.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+
+        progress.report({ increment: 100 });
+        return sortedExtensions;
+      }
+    );
   }
 }
