@@ -1,11 +1,17 @@
 {
   "name": "ext-share",
-  "displayName": "ExtShare: Share a list of installed VSC-Extensions",
-  "description": "Export your currently installed vscode extensions to a shareable JSON file. Use the Extension Viewer to select and install selected extensions.",
+  "displayName": "ExtShare",
+  "description": "Share and view installed extensions with others",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.85.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nico-i/ext-share"
+  },
+  "publisher": "Nico Ismaili",
+  "license": "MIT",
   "categories": [
     "Other"
   ],

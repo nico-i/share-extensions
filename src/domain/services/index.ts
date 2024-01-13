@@ -1,1 +1,1 @@
-export * from "./InstallerService";
+export * from "./ExtensionService";

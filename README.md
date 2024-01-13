@@ -1,71 +1,42 @@
-# share-extensions README
+# ExtShare | ext-share
 
-This is the README for your extension "share-extensions". After writing up a brief description, we recommend including the following sections.
+Export your currently installed vscode extensions to a shareable JSON file and use the provided *Extension Viewer* to view & install extensions present in the JSON file.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+ExtShare allows you to share your vscode extensions with your friends and colleagues via a JSON file export:
 
-For example if there is an image subfolder under your extension project workspace:
+<img src="./docs/img/json-export.gif" alt="JSON Export" height="300">
 
-\!\[feature X\]\(images/feature-x.png\)
+When any `.ext-share.json` file is opened, the *Extension Viewer* will automatically open (and close) with it.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+It allows you to browse listed extensions in the file in a similar manner as the vscode Extensions page:
 
-## Requirements
+<img src="./docs/img/extension-viewer.png" alt="Extension Viewer" height="300">
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+You can also install the extensions from the *Extension Viewer*:
 
-## Extension Settings
+<img src="./docs/img/extension-install.gif" alt="Extension Install" height="300">
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Clicking on an extension will open the extension's Extension page in vscode:
 
-For example:
+<img src="./docs/img/extension-page.gif" alt="Extension Page" height="300">
+  
+## Commands
 
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* `ExtShare: Export Extensions` - Export your currently installed extensions to a `extensions.share-ext.json` file in the current workspace.
+* `ExtShare: Open Extension Viewer` - Open the Extension Viewer for the current `.ext-share.json` file.
+  * This command is automatically run when any `.ext-share.json` file is opened.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- Initial release
+- `.ext-share.json` file format
+- JSON export
+- Extension Viewer
+- Synchronized opening/closing of Extension Viewer with `.ext-share.json` file
+- Rerendering of Extension Viewer when `.ext-share.json` file or currently installed extensions change
+- Installing extensions from Extension Viewer
+- Opening extension's Extension page in vscode from Extension Viewer

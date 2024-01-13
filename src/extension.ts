@@ -29,10 +29,13 @@ export function activate(context: vscode.ExtensionContext) {
   const subs = [
     // Rerender ExtensionViewer when extensions change
     vscode.extensions.onDidChange(() => {
-      vscode.window.showInformationMessage(
-        "Extensions changed. Updating Extensions Viewer."
-      );
-      ExtensionViewer.getInstance().rerender();
+      const viewer = ExtensionViewer.getInstance();
+      if (viewer.isOpen) {
+        vscode.window.showInformationMessage(
+          "Extensions changed. Updating Extensions Viewer."
+        );
+        viewer.rerender();
+      }
     }),
     // Rerender ExtensionViewer when the active extensions JSON file changes
     vscode.workspace.onDidChangeTextDocument((event) => {
@@ -81,15 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
       async () => {
         try {
           const workspaceFolders = vscode.workspace.workspaceFolders;
-
-          if (!workspaceFolders) {
-            vscode.window.showErrorMessage(
-              "No workspace is open. Please open a directory to use this command."
-            );
-            return;
-          }
-
-          const workspacePath = workspaceFolders[0].uri.fsPath;
+          const workspacePath = workspaceFolders?.[0].uri.fsPath ?? "";
           const fullPath = path.join(
             workspacePath,
             `extensions.${EXTENSION_LIST_FILE_EXT}`
