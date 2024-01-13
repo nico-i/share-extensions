@@ -26,19 +26,19 @@ export function activate(context: vscode.ExtensionContext) {
     ExtensionViewer.getInstance().rerender(activeEditor.document.uri);
   }
 
-  const subs = [
-    // Rerender ExtensionViewer when extensions change
-    vscode.extensions.onDidChange(() => {
-      const viewer = ExtensionViewer.getInstance();
-      if (viewer.isOpen) {
-        vscode.window.showInformationMessage(
-          "Extensions changed. Updating Extensions Viewer."
-        );
-        viewer.rerender();
-      }
-    }),
-    // Rerender ExtensionViewer when the active extensions JSON file changes
-    vscode.workspace.onDidChangeTextDocument((event) => {
+  const rerenderOnExtChange = vscode.extensions.onDidChange(() => {
+    const viewer = ExtensionViewer.getInstance();
+    if (viewer.isOpen) {
+      vscode.window.showInformationMessage(
+        "Extensions changed. Updating Extensions Viewer."
+      );
+      viewer.rerender();
+    }
+  });
+  context.subscriptions.push(rerenderOnExtChange);
+
+  const rerenderOnJsonChange = vscode.workspace.onDidChangeTextDocument(
+    (event) => {
       if (activeEditor) {
         const document = event.document;
         if (
@@ -48,75 +48,81 @@ export function activate(context: vscode.ExtensionContext) {
           ExtensionViewer.getInstance().rerender();
         }
       }
-    }),
-    // Open / Rerender ExtensionViewer when a extensions JSON file is opened
-    vscode.workspace.onDidOpenTextDocument((document) => {
+    }
+  );
+  context.subscriptions.push(rerenderOnJsonChange);
+
+  const rerenderOnJsonOpen = vscode.workspace.onDidOpenTextDocument(
+    (document) => {
       if (document.uri.fsPath.endsWith(EXTENSION_LIST_FILE_EXT)) {
         ExtensionViewer.getInstance().rerender(document.uri);
       }
-    }),
-    // Close ExtensionViewer when the active extensions JSON file is closed
-    vscode.workspace.onDidCloseTextDocument((document) => {
+    }
+  );
+  context.subscriptions.push(rerenderOnJsonOpen);
+
+  const closeOnJsonClose = vscode.workspace.onDidCloseTextDocument(
+    (document) => {
       if (document.uri.fsPath.endsWith(EXTENSION_LIST_FILE_EXT)) {
         const viewer = ExtensionViewer.getInstance();
         if (viewer.sourceFile === document.uri) {
           ExtensionViewer.getInstance().close();
         }
       }
-    }),
-    // Open ExtensionViewer
-    vscode.commands.registerCommand(
-      `${EXTENSION_NAME}.openExtensionViewer`,
-      () => {
-        const currentDocument = vscode.window.activeTextEditor?.document;
-        if (currentDocument?.fileName.endsWith(EXTENSION_LIST_FILE_EXT)) {
-          ExtensionViewer.getInstance().rerender(currentDocument.uri);
-        } else {
-          vscode.window.showErrorMessage(
-            `Please open a file ending with '.${EXTENSION_LIST_FILE_EXT}' to use this command.`
-          );
-        }
+    }
+  );
+  context.subscriptions.push(closeOnJsonClose);
+
+  const openViewer = vscode.commands.registerCommand(
+    `${EXTENSION_NAME}.openExtensionViewer`,
+    () => {
+      const currentDocument = vscode.window.activeTextEditor?.document;
+      if (currentDocument?.fileName.endsWith(EXTENSION_LIST_FILE_EXT)) {
+        ExtensionViewer.getInstance().rerender(currentDocument.uri);
+      } else {
+        vscode.window.showErrorMessage(
+          `Please open a file ending with '.${EXTENSION_LIST_FILE_EXT}' to use this command.`
+        );
       }
-    ),
-    // Write extensions to JSON
-    vscode.commands.registerCommand(
-      `${EXTENSION_NAME}.writeExtensionsToJson`,
-      async () => {
-        try {
-          const workspaceFolders = vscode.workspace.workspaceFolders;
+    }
+  );
+  context.subscriptions.push(openViewer);
 
-          if (!workspaceFolders) {
-            vscode.window.showErrorMessage(
-              "No workspace is open. Please open a directory to use this command."
-            );
-            return;
-          }
+  const writeExtensionsToJson = vscode.commands.registerCommand(
+    `${EXTENSION_NAME}.writeExtensionsToJson`,
+    async () => {
+      try {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
 
-          const workspacePath = workspaceFolders[0].uri.fsPath;
-          const fullPath = path.join(
-            workspacePath,
-            `extensions.${EXTENSION_LIST_FILE_EXT}`
-          );
-          await extensionService.writeExtensionsToJson(fullPath);
-          const fileUri = vscode.Uri.file(fullPath);
-          vscode.window.showInformationMessage(
-            `Extensions written to 'extensions.${EXTENSION_LIST_FILE_EXT}'`
-          );
-          vscode.window.showTextDocument(fileUri, {
-            viewColumn: vscode.ViewColumn.Beside,
-          });
-        } catch (e) {
+        if (!workspaceFolders) {
           vscode.window.showErrorMessage(
-            "Error writing file: " +
-              (`message` in (e as Error) ? (e as Error).message : e)
+            "No workspace is open. Please open a directory to use this command."
           );
+          return;
         }
-      }
-    ),
-  ];
 
-  // Add subscriptions to context
-  context.subscriptions.push(...subs);
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        const fullPath = path.join(
+          workspacePath,
+          `extensions.${EXTENSION_LIST_FILE_EXT}`
+        );
+        await extensionService.writeExtensionsToJson(fullPath);
+        const fileUri = vscode.Uri.file(fullPath);
+        vscode.window.showInformationMessage(
+          `Extensions written to 'extensions.${EXTENSION_LIST_FILE_EXT}'`
+        );
+        vscode.window.showTextDocument(fileUri, {
+          viewColumn: vscode.ViewColumn.Beside,
+        });
+      } catch (e) {
+        vscode.window.showErrorMessage(
+          "Error writing file: " +
+            (`message` in (e as Error) ? (e as Error).message : e)
+        );
+      }
+    }
+  );
+  context.subscriptions.push(writeExtensionsToJson);
 }
 
 export function deactivate() {}
