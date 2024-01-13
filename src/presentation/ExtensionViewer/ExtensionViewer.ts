@@ -47,6 +47,12 @@ export class ExtensionViewer {
       }
     );
 
+    const iconPath = vscode.Uri.file(
+      path.join(__dirname, "..", "images", "icon.png")
+    );
+
+    this._panel.iconPath = iconPath;
+
     this._panel.webview.onDidReceiveMessage(
       (message) => {
         switch (message.command) {

@@ -11,6 +11,7 @@
     "url": "https://github.com/nico-i/ext-share"
   },
   "publisher": "nico-i",
+  "icon": "images/icon.png",
   "license": "MIT",
   "categories": [
     "Other"

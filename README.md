@@ -6,21 +6,21 @@ Export your currently installed vscode extensions to a shareable JSON file and u
 
 ExtShare allows you to share your vscode extensions with your friends and colleagues via a JSON file export:
 
-<img src="./docs/img/json-export.gif" alt="JSON Export" height="300">
+<img src="./images/json-export.gif" alt="JSON Export" height="300">
 
 When any `.ext-share.json` file is opened, the *Extension Viewer* will automatically open (and close) with it.
 
 It allows you to browse listed extensions in the file in a similar manner as the vscode Extensions page:
 
-<img src="./docs/img/extension-viewer.png" alt="Extension Viewer" height="300">
+<img src="./images/extension-viewer.png" alt="Extension Viewer" height="300">
 
 You can also install the extensions from the *Extension Viewer*:
 
-<img src="./docs/img/extension-install.gif" alt="Extension Install" height="300">
+<img src="./images/extension-install.gif" alt="Extension Install" height="300">
 
 Clicking on an extension will open the extension's Extension page in vscode:
 
-<img src="./docs/img/extension-page.gif" alt="Extension Page" height="300">
+<img src="./images/extension-page.gif" alt="Extension Page" height="300">
   
 ## Commands
 
