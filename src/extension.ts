@@ -80,11 +80,19 @@ export function activate(context: vscode.ExtensionContext) {
     ),
     // Write extensions to JSON
     vscode.commands.registerCommand(
-      `${EXTENSION_NAME}.${extensionService.writeExtensionsToJson.name}`,
+      `${EXTENSION_NAME}.writeExtensionsToJson`,
       async () => {
         try {
           const workspaceFolders = vscode.workspace.workspaceFolders;
-          const workspacePath = workspaceFolders?.[0].uri.fsPath ?? "";
+
+          if (!workspaceFolders) {
+            vscode.window.showErrorMessage(
+              "No workspace is open. Please open a directory to use this command."
+            );
+            return;
+          }
+
+          const workspacePath = workspaceFolders[0].uri.fsPath;
           const fullPath = path.join(
             workspacePath,
             `extensions.${EXTENSION_LIST_FILE_EXT}`
